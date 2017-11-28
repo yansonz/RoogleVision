@@ -51,6 +51,9 @@ extractResponse <- function(pp, feature){
   if (feature == "LANDMARK_DETECTION") {
     return(pp$content$responses$landmarkAnnotations[[1]])
   }
+  if (feature == "IMAGE_PROPERTIES") {
+    return(pp$content$responses$imagePropertiesAnnotation$dominantColors$colors[[1]])
+  }
 }
 
 
