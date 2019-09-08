@@ -7,7 +7,7 @@
 # TEXT_DETECTION	Run OCR.
 # SAFE_SEARCH_DETECTION	Run various computer vision models to compute image safe-search properties.
 # IMAGE_PROPERTIES	Compute a set of properties about the image (such as the images dominant colors).
-
+# CROP_HINTS Provide suggested crop hints based on given aspect ratio
 
 ############################################################
 #' @title helper function base_encode code the image file
@@ -54,6 +54,9 @@ extractResponse <- function(pp, feature){
   if (feature == "IMAGE_PROPERTIES") {
     return(pp$content$responses$imagePropertiesAnnotation$dominantColors$colors[[1]])
   }
+  if (feature == "CROP_HINTS") {
+    return(pp$content$responses$cropHintsAnnotation$cropHints[[1]])
+  }
 }
 
 
@@ -71,16 +74,12 @@ extractResponse <- function(pp, feature){
 #' getGoogleVisionResponse(imagePath = f, feature = "LOGO_DETECTION")
 #' @import googleAuthR
 #'
-getGoogleVisionResponse <- function(imagePath, feature = "LABEL_DETECTION", numResults = 5){
+getGoogleVisionResponse <- function(imagePath, feature = "LABEL_DETECTION", numResults = 5, aspectRatios = 1.77){
 
   #################################
   txt <- imageToText(imagePath)
   ### create Request, following the API Docs.
-  if (is.numeric(numResults)) { 
-    body <- paste0('{  "requests": [    {   "image": { "content": "',txt,'" }, "features": [  { "type": "',feature,'", "maxResults": ',numResults,'} ],  }    ],}')
-  } else {
-    body <- paste0('{  "requests": [    {   "image": { "content": "',txt,'" }, "features": [  { "type": "',feature,'" } ],  }    ],}')
-  }
+  body <- paste0('{  "requests": [    {   "image": { "content": "',txt,'" }, "features": [  { "type": "',feature,'", "maxResults": ',numResults,'} ],  "imageContext": { "cropHintsParams": { "aspectRatios": "', aspectRatios,'"} } }  ]}')  
 
   simpleCall <- gar_api_generator(baseURI = "https://vision.googleapis.com/v1/images:annotate", http_header = "POST")
   ## set the request!
